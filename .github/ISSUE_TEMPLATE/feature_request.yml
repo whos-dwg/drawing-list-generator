@@ -1,0 +1,32 @@
+name: 功能建議
+description: 說明實際製圖或清單整理需求
+title: "[Feature] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 現在遇到什麼問題
+      description: 請描述操作情境與目前的處理方式。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 希望程式怎麼處理
+      description: 若有圖號或欄位範例，請使用合成資料。
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 涉及的版本與格式
+      placeholder: "例如 AutoCAD 2021、XLS 修訂範本"
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 可接受的替代方式
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 如何判斷已解決
+      description: 提供可重現的輸入與預期輸出，方便確認需求。

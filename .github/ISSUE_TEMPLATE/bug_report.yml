@@ -1,0 +1,66 @@
+name: 錯誤回報
+description: 回報掃描、分類、預覽或 Excel 匯出問題
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        請先查看 README 與疑難排解。請使用合成或已去識別資料，避免公開客戶 DWG、完整快取與個人路徑。安全問題請參閱 SECURITY.md。
+  - type: input
+    id: app_version
+    attributes:
+      label: 程式版本
+      placeholder: "例如 v8.12 / 2026.10.30-v8.12"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 執行環境
+      description: Windows、AutoCAD 年份、Excel 版本及位元架構；XLS 問題也請說明 ACE Provider。
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: 發生階段
+      options:
+        - 啟動或環境偵測
+        - DWG 掃描
+        - 圖號與分類
+        - Excel 預覽
+        - XLSX 匯出
+        - XLS 匯出或修訂模式
+        - 其他操作
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 重現步驟
+      description: 請包含檔案格式、相關設定與最小操作步驟。
+    validations:
+      required: true
+  - type: textarea
+    id: expected_actual
+    attributes:
+      label: 預期結果與實際結果
+    validations:
+      required: true
+  - type: input
+    id: diagnostic_id
+    attributes:
+      label: Diagnostic ID
+      description: 掃描失敗時填寫；沒有則可留白。
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 已去識別的紀錄或資料
+      description: 可附必要 log 片段、合成屬性 JSON、遮蔽後畫面與圖號排序範例。
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: 資料檢查
+      options:
+        - label: 我已移除附件與紀錄中的客戶、專案機密及個人資訊。
+          required: true

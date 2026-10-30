@@ -1,0 +1,119 @@
+{
+  "rows": [
+    {
+      "row": 1,
+      "kind": "category",
+      "category": "PLANS & ELEVATIONS",
+      "layout": "",
+      "cells": {
+        "A9": "",
+        "B9": "PLANS & ELEVATIONS",
+        "C9": "",
+        "D9": ""
+      }
+    },
+    {
+      "row": 2,
+      "kind": "drawing",
+      "category": "PLANS & ELEVATIONS",
+      "prefix": "L2-A-P1",
+      "layout": "L2-A-P1-001",
+      "cells": {
+        "A10": "L2-A-P1-001",
+        "B10": "GENERAL ARRANGEMENT PLAN",
+        "C10": "A1",
+        "D10": "v"
+      },
+      "drawing": {
+        "layout": "L2-A-P1-001",
+        "layoutIndex": 1,
+        "included": true,
+        "warnings": [],
+        "attributes": {
+          "DWG_NUMBER": "L2-A-P1-001",
+          "DRAWING_TITLE_1": "GENERAL ARRANGEMENT PLAN"
+        },
+        "scanIndex": 0,
+        "fileName": "sample.dwg",
+        "sheetSize": "A1",
+        "issuedThisBatch": "v"
+      }
+    },
+    {
+      "row": 3,
+      "kind": "blank",
+      "category": "PLANS & ELEVATIONS",
+      "layout": "",
+      "cells": {
+        "A11": "",
+        "B11": "",
+        "C11": "",
+        "D11": ""
+      }
+    },
+    {
+      "row": 4,
+      "kind": "category",
+      "category": "DETAILS",
+      "layout": "",
+      "cells": {
+        "A12": "",
+        "B12": "DETAILS",
+        "C12": "",
+        "D12": ""
+      }
+    },
+    {
+      "row": 5,
+      "kind": "drawing",
+      "category": "DETAILS",
+      "prefix": "L2-A-DW",
+      "layout": "L2-A-DW-003",
+      "cells": {
+        "A13": "L2-A-DW-003",
+        "B13": "WALL FINISH DETAIL",
+        "C13": "A1",
+        "D13": "v"
+      },
+      "drawing": {
+        "layout": "L2-A-DW-003",
+        "layoutIndex": 2,
+        "included": true,
+        "warnings": [],
+        "attributes": {
+          "DWG_NUMBER": "L2-A-DW-003",
+          "DRAWING_TITLE_1": "WALL FINISH DETAIL"
+        },
+        "scanIndex": 1,
+        "fileName": "sample.dwg",
+        "sheetSize": "A1",
+        "issuedThisBatch": "v"
+      }
+    }
+  ],
+  "issues": [],
+  "classifications": [
+    {
+      "scanIndex": 0,
+      "category": "PLANS & ELEVATIONS",
+      "confidence": "high",
+      "needsConfirmation": false,
+      "manual": false,
+      "titleCategory": "PLANS & ELEVATIONS",
+      "numberCategory": "PLANS & ELEVATIONS",
+      "numberToken": "P1",
+      "reason": "Title and drawing-number code P1 agree."
+    },
+    {
+      "scanIndex": 1,
+      "category": "DETAILS",
+      "confidence": "high",
+      "needsConfirmation": false,
+      "manual": false,
+      "titleCategory": "DETAILS",
+      "numberCategory": "DETAILS",
+      "numberToken": "DW",
+      "reason": "Title and drawing-number code DW agree."
+    }
+  ]
+}

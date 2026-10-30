@@ -1,0 +1,21 @@
+{
+  "preset": {
+    "targetWorksheet": "Drawing List",
+    "outputFields": [
+      {"name":"Drawing Number","startCell":"A9"},
+      {"name":"Drawing Title","startCell":"B9"},
+      {"name":"Size","startCell":"C9"},
+      {"name":"Current Batch","startCell":"D9"}
+    ]
+  },
+  "preview": {
+    "rows": [
+      {"row":1,"kind":"category","category":"DETAILS","cells":{"A9":"","B9":"DETAILS","C9":"","D9":""}},
+      {"row":2,"kind":"drawing","category":"DETAILS","cells":{"A10":"L1.B-DL-201","B10":"DECORATIVE LIGHTING DETAILS","C10":"A1","D10":"v"}},
+      {"row":3,"kind":"drawing","category":"DETAILS","cells":{"A11":"L1.B-DL-203","B11":"DECORATIVE LIGHTING DETAILS","C11":"A1","D11":"v"}},
+      {"row":4,"kind":"drawing","category":"DETAILS","cells":{"A12":"L1.B-DL-203-1","B12":"DECORATIVE LIGHTING DETAILS","C12":"A1","D12":"v"}},
+      {"row":5,"kind":"drawing","category":"DETAILS","cells":{"A13":"L1.B-DL-204","B13":"DECORATIVE LIGHTING DETAILS","C13":"A1","D13":"v"}},
+      {"row":6,"kind":"drawing","category":"DETAILS","cells":{"A14":"L1.B-DL-205","B14":"DECORATIVE LIGHTING DETAILS","C14":"A1","D14":"v"}}
+    ]
+  }
+}

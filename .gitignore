@@ -1,0 +1,32 @@
+# Local dependencies and portable runtime
+node_modules/
+/runtime/
+/DrawingList.exe
+
+# Project data and local diagnostics
+app/scan-cache/
+logs/
+autocad-diagnostic.txt
+*.dwg
+*.dwl
+*.dwl2
+*.xls
+*.xlsx
+*.bak
+*.log
+
+# Build and temporary artifacts
+*.pdb
+bin/
+obj/
+tmp/
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example
+
+# Workspace-only packaging folders
+/work/
+/outputs/
+/release-assets/

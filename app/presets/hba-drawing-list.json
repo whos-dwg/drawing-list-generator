@@ -1,0 +1,38 @@
+{
+  "name": "HBA Drawing List",
+  "titleBlockName": "A1_TITLE_EN",
+  "targetWorksheet": "Drawing List",
+  "sheetSize": "A1",
+  "sortMethod": "layoutOrder",
+  "autoClassify": true,
+  "blankRowOnPrefixChange": true,
+  "defaultCategory": "OTHER DRAWINGS",
+  "classificationOrder": [
+    "PLANS & ELEVATIONS",
+    "DETAILS",
+    "DOOR SCHEDULE",
+    "DOOR DETAIL",
+    "MILLWORK DETAIL",
+    "OTHER DRAWINGS"
+  ],
+  "classificationRules": [
+    {"name": "DOOR SCHEDULE", "keywords": ["DOOR SCHEDULE"]},
+    {"name": "DOOR DETAIL", "keywords": ["DOOR DETAIL"]},
+    {"name": "MILLWORK DETAIL", "keywords": ["MILLWORK", "JOINERY"]},
+    {"name": "PLANS & ELEVATIONS", "keywords": ["PLAN", "ELEVATION"]},
+    {"name": "DETAILS", "keywords": ["DETAIL", "SECTION"]}
+  ],
+  "numberClassificationRules": [
+    {"name": "PLANS & ELEVATIONS", "codes": ["P#", "EL", "ELE", "ELEV", "EV"]},
+    {"name": "DETAILS", "codes": ["DC", "DW", "DF"]},
+    {"name": "DOOR SCHEDULE", "codes": ["DS"]},
+    {"name": "DOOR DETAIL", "codes": ["DD"]},
+    {"name": "MILLWORK DETAIL", "codes": ["DM", "MW", "JN"]}
+  ],
+  "outputFields": [
+    {"name": "Drawing Number", "startCell": "A9", "formula": "{DWG_NUMBER}", "transforms": [{"type": "trim"}]},
+    {"name": "Drawing Title", "startCell": "B9", "formula": "{DRAWING_TITLE_1} {DRAWING_TITLE_3} {DRAWING_TITLE_2} {DRAWING_TITLE_4}", "transforms": [{"type": "trim"}, {"type": "dedupeSpaces"}, {"type": "uppercaseEnglish"}, {"type": "replace", "find": "ELEVATIONS", "replace": "ELEVATION"}]},
+    {"name": "Size", "startCell": "C9", "formula": "{SHEET_SIZE}", "transforms": [{"type": "trim"}, {"type": "uppercaseEnglish"}]},
+    {"name": "Current Batch", "startCell": "D9", "formula": "{ISSUED_THIS_BATCH}", "transforms": [{"type": "trim"}]}
+  ]
+}
