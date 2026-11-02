@@ -100,7 +100,7 @@ flowchart LR
 | `.xls` 匯出 | Microsoft ACE OLEDB 12.0 Provider，加上桌面版 Excel COM；Provider 位元架構須與執行的 PowerShell 相容 |
 | Node.js | 免安裝版自帶執行環境；原始碼啟動可用 Node.js 24，本次測試使用 v24.22.1 |
 | 瀏覽器 | 可存取本機服務的桌面瀏覽器；程式未提供瀏覽器版本相容性矩陣 |
-| 輸入資料 | 使用 `A1_TITLE_EN` 圖框的 DWG，以及自行提供的 Excel 範本 |
+| 輸入資料 | 含紙空間圖框的 DWG 與自行提供的 Excel 範本；圖框預設為 `A1_TITLE_EN`，可由 CAD INPUT 更改 |
 
 AutoCAD、Excel 與 ACE Provider 不包含在下載包內。此版本未附可直接操作的範例 DWG 或 Excel 範本。
 
