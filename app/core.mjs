@@ -1,3 +1,5 @@
+import {cadInputFromPreset, mapCadAttributes, normalizeCadInput, sameBlockSelection} from './cad-input.mjs';
+
 const CELL_RE = /^([A-Z]+)([1-9][0-9]*)$/i;
 const TOKEN_RE = /\{([^{}]+)\}/g;
 
@@ -18,7 +20,14 @@ export function resolveToken(name, drawing) {
   return found ? String(attrs[found] ?? '') : '';
 }
 
-export function normalizeScanResult(scan) {
+export function normalizeScanResult(scan, input = {}) {
+  const config = normalizeCadInput(input);
+  for (const layout of scan?.layouts ?? []) {
+    layout.rawAttributes ??= {...layout.attributes};
+    layout.attributes = mapCadAttributes(layout.rawAttributes, config);
+    // Older cached scans can contain the informational correction marker.
+    layout.warnings = (layout.warnings ?? []).filter(warning => !warning.startsWith('LAYOUT_FIELD_RESOLVED:'));
+  }
   const layouts=scan?.layouts??[],layoutNames=layouts.map(x=>String(x.layout??'')).filter(Boolean);
   const rawNumbers=layouts.map(layout=>{const attrs=layout.attributes??{},key=Object.keys(attrs).find(name=>name.toUpperCase()==='DWG_NUMBER');return key?String(attrs[key]??''):''});
   const counts=new Map();for(const value of rawNumbers){const key=value.toUpperCase();if(key)counts.set(key,(counts.get(key)??0)+1)}
@@ -60,6 +69,7 @@ export function renderFormula(formula, drawing, transforms = []) {
 }
 
 export function buildPreview(scan, preset) {
+  scan = normalizeScanResult({...scan, layouts: (scan.layouts ?? []).map(layout => ({...layout}))}, cadInputFromPreset(preset));
   const allLayouts = (scan.layouts ?? []).map((x, scanIndex) => ({ ...x, scanIndex, fileName: x.fileName ?? scan.fileName, sheetSize:preset.sheetSize||'A1', issuedThisBatch:preset.issuedThisBatch===false?'':'v' }));
   const source = allLayouts.filter(x => x.included);
   const organized = organizeDrawings(source, preset);
@@ -84,6 +94,7 @@ export function buildPreview(scan, preset) {
   return {
     rows,
     issues: validate(scan, preset, rows),
+    layouts: scan.layouts,
     classifications: allLayouts.map(drawing => ({ scanIndex:drawing.scanIndex, ...classifyDrawingDetailed(drawing, preset) }))
   };
 }
@@ -210,6 +221,8 @@ function normalizeDetailPrefix(value){return String(value??'').toUpperCase().rep
 
 export function validate(scan, preset, rows = []) {
   const issues = [];
+  if (!(scan.layouts ?? []).some(layout => layout.included)) issues.push(issue('error', 'NO_SELECTED_DRAWINGS', 'No drawings are selected. Check the block names in Admin, scan again, and select the drawing rows to export.'));
+  if (scan.cadInput && !sameBlockSelection(scan.cadInput, cadInputFromPreset(preset))) return [issue('error', 'SCAN_BLOCK_CONFIG_CHANGED', 'Block selection changed. Scan the drawings again to read the selected blocks.')];
   if (!preset.targetWorksheet?.trim()) issues.push(issue('error', 'MISSING_WORKSHEET', 'Target worksheet is required.'));
   for (const f of preset.outputFields ?? []) {
     try { parseCell(f.startCell); } catch (e) { issues.push(issue('error', 'INVALID_START_CELL', e.message, f.name)); }
@@ -242,6 +255,7 @@ const issue = (severity, code, message, context = '', details = {}) => ({ severi
 
 export const defaultPreset = {
   name: 'HBA Drawing List', titleBlockName: 'A1_TITLE_EN', targetWorksheet: 'Drawing List', sheetSize:'A1', sortMethod: 'layoutOrder', autoClassify:true, blankRowOnPrefixChange:true, defaultCategory:'OTHER DRAWINGS', classificationOrder:['PLANS & ELEVATIONS','DETAILS','DOOR SCHEDULE','DOOR DETAIL','MILLWORK DETAIL','OTHER DRAWINGS'],
+  cadInput: normalizeCadInput(),
   classificationRules:[
     {name:'DOOR SCHEDULE',keywords:['DOOR SCHEDULE']},
     {name:'DOOR DETAIL',keywords:['DOOR DETAIL']},

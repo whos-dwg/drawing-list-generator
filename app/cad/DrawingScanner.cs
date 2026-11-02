@@ -34,8 +34,9 @@ namespace DrawingList.CadPlugin
                     db.CloseInput(true);
                     previous = HostApplicationServices.WorkingDatabase;
                     HostApplicationServices.WorkingDatabase = db;
-                    var json = ScanDatabase(db, Path.GetFileName(input), "A1_TITLE_EN");
+                    var json = ScanDatabase(db, Path.GetFileName(input), ReadTargetNames(), ReadNumberTag());
                     File.WriteAllText(output, json, new UTF8Encoding(false));
+                    HostApplicationServices.WorkingDatabase = previous;
                 }
                 WriteMessage("\nDLSCAN_OK " + output);
             }
@@ -63,7 +64,7 @@ namespace DrawingList.CadPlugin
             if (String.IsNullOrWhiteSpace(output)) output = Path.ChangeExtension(doc.Name, ".drawing-list.json");
             try
             {
-                var json = ScanDatabase(doc.Database, Path.GetFileName(doc.Name), "A1_TITLE_EN");
+                var json = ScanDatabase(doc.Database, Path.GetFileName(doc.Name), ReadTargetNames(), ReadNumberTag());
                 File.WriteAllText(output, json, new UTF8Encoding(false));
                 doc.Editor.WriteMessage("\nDLSCAN_OK " + output);
             }
@@ -74,10 +75,26 @@ namespace DrawingList.CadPlugin
             }
         }
 
-        private static string ScanDatabase(Database db, string fileName, string target)
+        private static string[] ReadTargetNames()
+        {
+            var value = Environment.GetEnvironmentVariable("DRAWING_LIST_BLOCK_NAMES");
+            if (String.IsNullOrWhiteSpace(value)) return new[] { "A1_TITLE_EN" };
+            return value.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim()).Where(x => x.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+        }
+
+        private static string ReadNumberTag()
+        {
+            var value = Environment.GetEnvironmentVariable("DRAWING_LIST_NUMBER_TAG");
+            return String.IsNullOrWhiteSpace(value) ? "DWG_NUMBER" : value.Trim();
+        }
+
+        private static string ScanDatabase(Database db, string fileName, string[] targets, string numberTag)
         {
             var rows = new List<string>();
             var ordered = new List<Tuple<string, int, ObjectId>>();
+            var blockCounts = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            var blockTags = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
             using (var tr = db.TransactionManager.StartTransaction())
             {
                 var layouts = (DBDictionary)tr.GetObject(db.LayoutDictionaryId, OpenMode.ForRead);
@@ -95,6 +112,7 @@ namespace DrawingList.CadPlugin
                 {
                     var space = (BlockTableRecord)tr.GetObject(layout.Item3, OpenMode.ForRead);
                     var matches = new List<BlockReference>();
+                    var matchNames = new List<string>();
                     foreach (ObjectId id in space)
                     {
                         var block = tr.GetObject(id, OpenMode.ForRead, false) as BlockReference;
@@ -102,7 +120,26 @@ namespace DrawingList.CadPlugin
                         var defId = block.IsDynamicBlock ? block.DynamicBlockTableRecord : block.BlockTableRecord;
                         var def = tr.GetObject(defId, OpenMode.ForRead, false) as BlockTableRecord;
                         if (def == null || def.IsFromExternalReference || def.IsFromOverlayReference) continue;
-                        if (String.Equals(def.Name, target, StringComparison.OrdinalIgnoreCase)) matches.Add(block);
+                        if (!blockCounts.ContainsKey(def.Name))
+                        {
+                            blockCounts[def.Name] = 0;
+                            blockTags[def.Name] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                            // Inspect each definition once, even when a symbol
+                            // has thousands of instances in the drawing.
+                            foreach (ObjectId definitionId in def)
+                            {
+                                var definition = tr.GetObject(definitionId, OpenMode.ForRead, false) as AttributeDefinition;
+                                if (definition != null) blockTags[def.Name].Add(definition.Tag ?? "");
+                            }
+                        }
+                        blockCounts[def.Name]++;
+                        foreach (ObjectId attrId in block.AttributeCollection)
+                        {
+                            var attribute = tr.GetObject(attrId, OpenMode.ForRead, false) as AttributeReference;
+                            if (attribute != null) blockTags[def.Name].Add(attribute.Tag ?? "");
+                        }
+                        if (targets.Any(target => String.Equals(def.Name, target, StringComparison.OrdinalIgnoreCase)))
+                        { matches.Add(block); matchNames.Add(def.Name); }
                     }
 
                     var warnings = new List<string>();
@@ -111,22 +148,30 @@ namespace DrawingList.CadPlugin
                     var attrs = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                     if (matches.Count > 0)
                     {
+                        var selected = matches[0];
+                        var definition = (BlockTableRecord)tr.GetObject(selected.IsDynamicBlock ? selected.DynamicBlockTableRecord : selected.BlockTableRecord, OpenMode.ForRead);
+                        foreach (ObjectId definitionId in definition)
+                        {
+                            var constant = tr.GetObject(definitionId, OpenMode.ForRead, false) as AttributeDefinition;
+                            if (constant != null && constant.Constant) attrs[constant.Tag ?? ""] = constant.TextString ?? "";
+                        }
                         foreach (ObjectId attrId in matches[0].AttributeCollection)
                         {
                             var attr = tr.GetObject(attrId, OpenMode.ForRead, false) as AttributeReference;
                             if (attr == null) continue;
                             var tag = attr.Tag ?? "";
                             var value = attr.TextString ?? "";
-                            var resolved = ResolveLayoutDependentDrawingNumber(tag, value, layout.Item1, attr.HasFields, ordered.Select(x => x.Item1));
+                            var resolved = ResolveLayoutDependentDrawingNumber(tag, value, layout.Item1, attr.HasFields, ordered.Select(x => x.Item1), numberTag);
                             attrs[tag] = resolved;
                             if (String.IsNullOrWhiteSpace(resolved)) warnings.Add("EMPTY_ATTRIBUTE:" + tag);
                         }
                     }
-                    rows.Add(LayoutJson(layout.Item1, layout.Item2, target, matches.Count, attrs, warnings));
+                    rows.Add(LayoutJson(layout.Item1, layout.Item2, matchNames.Count > 0 ? matchNames[0] : String.Join(", ", targets), matches.Count, attrs, warnings));
                     tr.Commit();
                 }
             }
-            return "{\"fileName\":" + Q(fileName) + ",\"status\":\"ok\",\"layouts\":[" + String.Join(",", rows) + "]}";
+            var blocks = blockCounts.Select(x => "{\"name\":" + Q(x.Key) + ",\"count\":" + x.Value + ",\"tags\":[" + String.Join(",", blockTags[x.Key].OrderBy(tag => tag).Select(Q)) + "]}");
+            return "{\"fileName\":" + Q(fileName) + ",\"status\":\"ok\",\"blocks\":[" + String.Join(",", blocks) + "],\"layouts\":[" + String.Join(",", rows) + "]}";
         }
 
         private static string LayoutJson(string layoutName, int tabOrder, string target, int count, SortedDictionary<string,string> attrs, List<string> warnings)
@@ -145,9 +190,9 @@ namespace DrawingList.CadPlugin
             File.WriteAllText(output, error, new UTF8Encoding(false));
         }
 
-        private static string ResolveLayoutDependentDrawingNumber(string tag, string value, string layoutName, bool hasFields, IEnumerable<string> layoutNames)
+        private static string ResolveLayoutDependentDrawingNumber(string tag, string value, string layoutName, bool hasFields, IEnumerable<string> layoutNames, string numberTag)
         {
-            if (!hasFields || !String.Equals(tag, "DWG_NUMBER", StringComparison.OrdinalIgnoreCase)) return value;
+            if (!hasFields || !String.Equals(tag, numberTag, StringComparison.OrdinalIgnoreCase)) return value;
             if (String.IsNullOrWhiteSpace(layoutName) || String.Equals(layoutName, "Model", StringComparison.OrdinalIgnoreCase)) return value;
             // A common title-block field is "L2-" + CTAB. When a DWG was last
             // saved from Model space, its cached field result is L2-Model. A

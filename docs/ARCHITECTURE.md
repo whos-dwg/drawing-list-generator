@@ -8,6 +8,7 @@
 app/
 ├── package.json
 ├── server.mjs                  HTTP API、快取、暫存檔、診斷與工作程序
+├── cad-input.mjs               CAD 輸入正規化、標準屬性映射與圖框比對
 ├── core.mjs                    分類、Token、分組、排序、驗證及預覽
 ├── public/
 │   ├── index.html              使用者介面
@@ -63,7 +64,8 @@ flowchart TB
 | 方法與路徑 | 用途 |
 | --- | --- |
 | GET `/api/heartbeat` | 更新活動時間 |
-| GET `/api/preset` | 回傳 core.mjs 的 defaultPreset |
+| GET `/api/preset` | 回傳預設值與已保存的 CAD 輸入設定 |
+| POST `/api/cad-input` | 驗證並以暫存檔重新命名方式保存本機 CAD 輸入設定 |
 | GET `/api/system` | 執行 AutoCAD 偵測 |
 | POST `/api/scan` | 接受 fileName／dataBase64，掃描或讀快取 |
 | POST `/api/preview` | 接受 scan／preset，建立預覽與問題清單 |
@@ -78,15 +80,15 @@ AutoCAD 安裝偵測涵蓋 2018／2021／2026，依版本由新到舊嘗試。�
 
 2021 路徑啟動中性 Core Console 工作階段，以 `DLSCANFILE` 讀取側載資料庫；2018／2026 使用 `/i` 開啟 DWG 後執行 `DLSCAN`。每次 Core Console 嘗試最多等待 600 秒。
 
-掃描器依 Tab Order 讀取非 Model Layout，找出直接放置且名稱符合的圖塊。動態圖塊使用動態定義名稱。圖框目前固定為 `A1_TITLE_EN`。
+掃描器依 Tab Order 讀取非 Model Layout，找出直接放置且名稱符合的圖塊。動態圖塊使用動態定義名稱。v8.13 透過環境變數傳入所選完整圖框名稱與圖號標籤；2021 DLL 讀取常數與參考屬性，並回傳圖塊名稱、數量與屬性標籤清單。自訂圖框或圖號標籤會跳過 2018／2026 的舊 DLL。
 
-`DrawingScanner.cs` 只針對帶 Fields 的 DWG_NUMBER 做 Layout 字尾修正。`core.mjs` 的 `normalizeScanResult` 另外處理符合條件的 Model 或重複快取值，作為後端正規化。這些規則均不等同於通用 Field 求值。
+`DrawingScanner.cs` 對映射指定的圖號屬性，在帶 Fields 時做 Layout 字尾修正。`core.mjs` 的 `normalizeScanResult` 另外處理符合條件的 Model 或重複快取值，作為後端正規化。這些規則均不等同於通用 Field 求值。
 
 ## 分類與驗證
 
 分類同時使用圖名與圖號。人工覆寫有效時優先；沒有覆寫時，圖名和圖號衝突會要求確認。未知類別必須明確確認 OTHER DRAWINGS。
 
-`buildPreview` 產生 category、blank、drawing 三種列。`validate` 檢查必要工作表設定、儲存格格式、來源警告、分類確認、圖號缺漏與跨檔重複圖號。工作表是否存在則由 Excel 寫入階段確認。
+`buildPreview` 先從 rawAttributes 套用 CAD 屬性映射，再產生 category、blank、drawing 三種列；改選圖框後，SCAN_BLOCK_CONFIG_CHANGED 會阻擋舊資料匯出。掃描快取鍵也包含完整 CAD 輸入設定。`validate` 檢查必要工作表設定、儲存格格式、來源警告、分類確認、圖號缺漏與跨檔重複圖號。工作表是否存在則由 Excel 寫入階段確認。
 
 ## Excel 路徑
 
@@ -108,9 +110,9 @@ cd app
 npm test
 ~~~
 
-`package.json` 未宣告外部 npm 套件。核心測試可以獨立執行，無須啟動 AutoCAD 或 Excel。本次在 Windows／Node.js v24.18.0 執行 9 項既有測試，全數通過。
+`package.json` 未宣告外部 npm 套件。核心測試可以獨立執行，無須啟動 AutoCAD 或 Excel。本次在 Windows／Node.js v24.22.1 執行 15 項來源單元測試，全數通過，包含新增的 6 項 CAD 輸入設定測試。
 
-測試未涵蓋 AutoCAD DLL、Excel COM／OLEDB、頁面互動或啟動器。隨附 `.github/workflows/core-tests.yml` 可在 GitHub 上執行同一組核心測試；新增 workflow 不代表已取得雲端通過紀錄。
+測試未涵蓋 AutoCAD DLL、Excel COM／OLEDB、頁面互動或啟動器。隨附 `.github/workflows/core-tests.yml` 可在 GitHub 上執行同一組核心測試；實際雲端結果請查看該工作流程。附帶的 tests/integration-cad-input.mjs 為另外執行的整合流程，需要先建置 CadInputFixture.cs 並準備 AutoCAD 與 Excel 範本，本次未執行。
 
 ## 建置缺口
 

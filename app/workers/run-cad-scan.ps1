@@ -4,6 +4,7 @@ param(
   [string]$DiagnosticLog,
   [string]$ScanId,
   [string]$ApplicationVersion,
+  [string]$ScanConfig,
   [switch]$DetectOnly
 )
 $ErrorActionPreference = 'Stop'
@@ -66,6 +67,13 @@ if ($DetectOnly) {
   exit 0
 }
 if (!$Dwg -or !$Output) { throw 'Dwg and Output are required.' }
+$blockNames=@('A1_TITLE_EN');$numberTag='DWG_NUMBER'
+if($ScanConfig){
+  $config=Get-Content -LiteralPath $ScanConfig -Raw -Encoding UTF8|ConvertFrom-Json
+  $blockNames=@($config.blockNames)
+  $numberTag=[string]$config.attributeMap.DWG_NUMBER
+  if(!$blockNames.Count -or [string]::IsNullOrWhiteSpace($numberTag)){throw 'Block names and a drawing-number attribute are required.'}
+}
 if ([string]::IsNullOrWhiteSpace($ScanId)) { $ScanId=(Get-Date -Format 'yyyyMMdd-HHmmss')+'-'+[guid]::NewGuid().ToString('N').Substring(0,4).ToUpperInvariant() }
 if ([string]::IsNullOrWhiteSpace($DiagnosticLog)) {
   $diagnosticRoot=Join-Path (Split-Path -Parent $app) 'logs\cad-diagnostics';New-Item -ItemType Directory -Force -Path $diagnosticRoot|Out-Null
@@ -78,6 +86,10 @@ if (!$usableInstallations.Count) { Write-Diagnostic 'SCAN RESULT' 'FAILED' 'stag
 
 $failures = @()
 foreach ($installation in $usableInstallations) {
+  if($installation.version -ne 2021 -and (($blockNames -join ',') -ne 'A1_TITLE_EN' -or $numberTag -ne 'DWG_NUMBER')){
+    $failures += "AutoCAD $($installation.version): configurable blocks require the validated AutoCAD 2021 scanner"
+    continue
+  }
   $plugin = Join-Path $app ("cad\" + $installation.version + "\DrawingList.CadPlugin.dll")
   if (!(Test-Path -LiteralPath $plugin)) {
     $failures += "AutoCAD $($installation.version): version-specific scanner is not installed"
@@ -112,6 +124,8 @@ foreach ($installation in $usableInstallations) {
     [System.IO.File]::WriteAllText($script, $commands + "`n", [System.Text.Encoding]::ASCII)
     $env:DRAWING_LIST_OUTPUT = $Output
     $env:DRAWING_LIST_DWG = $Dwg
+    $env:DRAWING_LIST_BLOCK_NAMES = $blockNames -join "`n"
+    $env:DRAWING_LIST_NUMBER_TAG = $numberTag
     $env:DRAWING_LIST_DIAGNOSTIC_LOG = $DiagnosticLog
     $env:DRAWING_LIST_SCAN_ID = $ScanId
     $processArguments = if($sideDatabaseScan){('/s "{0}" /l en-US' -f $script.Replace('"','\"'))}else{('/i "{0}" /s "{1}" /l en-US' -f $Dwg.Replace('"','\"'), $script.Replace('"','\"'))}

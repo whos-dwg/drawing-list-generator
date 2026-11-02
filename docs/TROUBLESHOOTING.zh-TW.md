@@ -40,7 +40,7 @@
 
 ## 找不到圖框或只讀到一個圖框
 
-掃描器只處理紙空間 Layout 的直接圖塊參考，固定名稱為 `A1_TITLE_EN`。Model 空間、巢狀圖塊與外部參考中的圖框不會被遞迴讀取。
+掃描器只處理紙空間 Layout 的直接圖塊參考，依 CAD INPUT 的完整名稱清單比對，預設為 `A1_TITLE_EN`。Model 空間、巢狀圖塊與外部參考中的圖框不會被遞迴讀取。
 
 沒有符合圖框時，Layout 預設不納入。多個符合圖框時會警告 `MULTIPLE_TITLE_BLOCKS`，但目前只讀取第一個；請在 DWG 中整理圖框，再重新掃描。
 
@@ -78,9 +78,15 @@ XLS 修訂模式包含固定 A:L 清理範圍、A/B/C 資料欄與歷史批次�
 
 兩條 Excel 路徑都會更改部分字型或樣式，不能保證所有範本排版完全不變。
 
+## SCAN_BLOCK_CONFIG_CHANGED 或 NO_SELECTED_DRAWINGS
+
+更換圖框名稱後，按 SCAN DRAWINGS 重新掃描。只改來源屬性標籤可保存後重建預覽。若沒有納入的圖紙，先查看 DISCOVERED BLOCKS 的實際名稱與屬性，再檢查 IN 欄位。
+
+若來源圖框在外部參考或巢狀圖塊中，目前不會遞迴讀取。多個所選圖框同時存在時仍只讀第一個，請檢查 MULTIPLE_TITLE_BLOCKS。
+
 ## 設定不見了或修改 JSON 沒有效果
 
-頁面設定只保留於目前工作階段。`app/presets/hba-drawing-list.json` 不會自動載入；永久預設值來自 `app/core.mjs`。圖框名稱仍由 CAD DLL 決定。詳見[設定說明](CONFIGURATION.zh-TW.md)。
+CAD INPUT 可保存至 `app/local-settings.json`；請確認已按 SAVE INPUT SETTINGS，且 app 資料夾可寫入。Excel 輸出設定只保留於目前工作階段。`app/presets/hba-drawing-list.json` 不會自動載入；永久預設值來自 `app/core.mjs`。圖框名稱與屬性映射請從 CAD INPUT 設定；修改圖框名稱後須重新掃描。自訂圖框或圖號標籤需要 2021 掃描器。詳見[設定說明](CONFIGURATION.zh-TW.md)。
 
 ## 回報時提供什麼
 

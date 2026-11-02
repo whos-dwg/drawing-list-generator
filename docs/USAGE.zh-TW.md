@@ -4,7 +4,7 @@
 
 ## 準備資料
 
-使用可正常讀取的 DWG 與 Excel 範本副本。圖框須為紙空間 Layout 中直接插入的 `A1_TITLE_EN` 圖塊；圖號屬性為 `DWG_NUMBER`，圖名屬性為 `DRAWING_TITLE_1` 至 `DRAWING_TITLE_4`。
+使用可正常讀取的 DWG 與 Excel 範本副本。圖框須直接插入紙空間 Layout。預設是 `A1_TITLE_EN` 與標準圖號／圖名屬性；其他圖框可在 ADMIN SETTINGS → CAD INPUT 指定完整名稱與屬性映射，再按 SAVE INPUT SETTINGS。
 
 預設 Excel 工作表名稱為 `Drawing List`，輸出從 A9:D9 起算。範本、客戶圖紙與外部元件須自行準備。
 
@@ -18,11 +18,17 @@
 
 ADD DWG 依檔名、大小與最後修改時間避免重複加入。使用 **CLEAR** 可清除目前選檔與掃描結果；它不會刪除磁碟上的掃描快取。
 
+## CAD INPUT 與 DISCOVERED BLOCKS
+
+圖號標籤必填；未使用的圖名欄位可留空。SAVE INPUT SETTINGS 保存 CAD 輸入設定，RESET TO DEFAULT 可還原預設。掃描後，DISCOVERED BLOCKS 列出紙空間圖塊名稱與屬性；點選名稱可帶入設定，但改選圖框後須重新掃描。
+
+只改屬性映射時可從已保留的原始屬性更新預覽，不需要重新讀取 CAD。若映射的圖號標籤不存在，仍會回報缺少圖號，不會偷偷沿用原有標準標籤。
+
 ## 2. 掃描
 
 按 **SCAN DRAWINGS**。程式依序處理各 DWG，顯示 SCANNED 或 CACHED 計數，接著彙整 Layout。
 
-掃描快取以掃描器版本字串與 DWG 檔案內容產生索引；相同檔名不代表相同快取。修改 DWG 內容後會使用另一個索引。
+掃描快取以掃描器版本、正規化的 CAD 輸入設定及 DWG 檔案內容產生索引；相同檔名不代表相同快取。修改 DWG 內容後會使用另一個索引。
 
 ## 3. 檢查分類
 
@@ -40,6 +46,8 @@ ADD DWG 依檔名、大小與最後修改時間避免重複加入。使用 **CLE
 
 | 代碼 | 影響與處理方式 |
 | --- | --- |
+| `NO_SELECTED_DRAWINGS` | 阻擋產生；檢查圖框名稱並納入至少一張圖紙 |
+| `SCAN_BLOCK_CONFIG_CHANGED` | 阻擋產生；CAD INPUT 的圖框名稱已變更，須重新掃描 |
 | `UNCONFIRMED_CLASSIFICATION` | 阻擋產生；選擇分類或 CONFIRM OTHER |
 | `DUPLICATE_DWG_NUMBER` | 阻擋產生；點擊問題跳至對應列，修正 DWG 或取消重複圖紙的納入 |
 | `MISSING_DWG_NUMBER` | 阻擋產生；補齊來源 DWG 圖號 |
@@ -74,6 +82,6 @@ Excel write preview 顯示分類標題、空白列、圖紙列及目標儲存格
 
 ## 工作階段與紀錄
 
-目前管理設定與人工分類保留在頁面記憶體中；重新整理後需重新設定與選檔。頁面每 30 秒送出本機心跳，服務超過約兩分鐘未收到請求時會嘗試關閉，之後需重新啟動。
+CAD INPUT 的圖塊名稱與屬性映射儲存在 `app/local-settings.json`，下次啟動會還原。Excel 輸出設定與人工分類仍保留在頁面記憶體中；重新整理後需重新設定並選檔。頁面每 30 秒送出本機心跳，服務超過約兩分鐘未收到請求時會嘗試關閉，之後需重新啟動。
 
 掃描失敗時，記下 Diagnostic ID，再從 ADMIN SETTINGS 開啟診斷資料夾。回報前移除敏感內容，參見[疑難排解](TROUBLESHOOTING.zh-TW.md)。

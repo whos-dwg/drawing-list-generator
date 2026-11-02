@@ -6,13 +6,17 @@ import crypto from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { buildPreview, defaultPreset, normalizeScanResult } from './core.mjs';
+import { normalizeCadInput } from './cad-input.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url)),publicDir=path.join(root,'public'),workerDir=path.join(root,'workers');
 const runner=path.join(workerDir,'run-cad-scan.ps1'),excelWriter=path.join(workerDir,'write-excel-template.ps1'),xlsWriter=path.join(workerDir,'write-excel-xls.ps1');
 const cacheDir=path.join(root,'scan-cache'),logDir=path.resolve(root,'..','logs','cad-diagnostics');
-const applicationVersion='2026.10.30-v8.12',scannerVersion='drawing-scanner-2026-10-30-silent-layout-fix-4',port=Number(process.env.PORT||4310);
+const settingsFile=path.join(root,'local-settings.json');
+const applicationVersion='2026.11.02-v8.13',scannerVersion='drawing-scanner-2026-11-02-configurable-input-5',port=Number(process.env.PORT||4310);
 const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json'};
 let lastHeartbeat=Date.now();
+let savedCadInput=normalizeCadInput();
+try { savedCadInput=normalizeCadInput(JSON.parse(await fs.readFile(settingsFile,'utf8')).cadInput); } catch {}
 
 await fs.mkdir(logDir,{recursive:true});
 await cleanupResidualSuccessLogs();
@@ -21,7 +25,14 @@ const server=http.createServer(async(req,res)=>{
   try{
     lastHeartbeat=Date.now();
     if(req.method==='GET'&&req.url==='/api/heartbeat')return json(res,200,{ok:true});
-    if(req.method==='GET'&&req.url==='/api/preset')return json(res,200,defaultPreset);
+    if(req.method==='GET'&&req.url==='/api/preset')return json(res,200,{...defaultPreset,cadInput:savedCadInput});
+    if(req.method==='POST'&&req.url==='/api/cad-input'){
+      const body=await readJson(req);let config;
+      try{config=normalizeCadInput(body.cadInput)}catch(error){return json(res,400,{error:'INVALID_CAD_INPUT',message:error.message})}
+      await fs.writeFile(settingsFile+'.tmp',JSON.stringify({cadInput:config},null,2),'utf8');
+      await fs.rename(settingsFile+'.tmp',settingsFile);savedCadInput=config;
+      return json(res,200,{cadInput:config});
+    }
     if(req.method==='GET'&&req.url==='/api/system'){try{return json(res,200,JSON.parse(await runPowerShell(runner,['-DetectOnly'])))}catch(error){return json(res,200,{available:false,installations:[],message:error.message})}}
     if(req.method==='POST'&&req.url==='/api/open-diagnostics'){await openFolder(logDir);return json(res,200,{ok:true,path:logDir})}
     if(req.method==='POST'&&req.url==='/api/preview'){const body=await readJson(req);return json(res,200,buildPreview(body.scan,body.preset))}
@@ -46,14 +57,16 @@ async function handleScan(req,res){
   try{
     const body=await readJson(req,40*1024*1024),fileName=safeName(body.fileName,'.dwg'),desiredLog=path.join(logDir,`scan_${scanId}_${safeLogName(fileName)}.log`);
     await fs.rename(diagnosticLog,desiredLog);diagnosticLog=desiredLog;
-    const bytes=Buffer.from(body.dataBase64,'base64');stage='FILE_ACCEPTED';await appendDiagnostic(diagnosticLog,scanId,'API',stage,`fileName=${fileName} size=${bytes.length}`);
-    const key=crypto.createHash('sha256').update(scannerVersion).update(bytes).digest('hex'),cachePath=path.join(cacheDir,`${key}.json`);await fs.mkdir(cacheDir,{recursive:true});
-    try{await appendDiagnostic(diagnosticLog,scanId,'SCAN','BACKEND_PARSE_BEGIN','source=scan-cache');const cached=normalizeScanResult(JSON.parse(await fs.readFile(cachePath,'utf8')));cached.fileName=fileName;cached.cacheHit=true;cached.scanDurationMs=Date.now()-started;cached.diagnosticId=scanId;await appendDiagnostic(diagnosticLog,scanId,'API','RESULT_PARSE_OK','cacheHit=true JSONValid=true');await appendDiagnostic(diagnosticLog,scanId,'SCAN','BACKEND_PARSE_OK','cacheHit=true JSONValid=true');return sendSuccessfulScan(res,cached,diagnosticLog,scanId,started)}catch{}
+    const config=normalizeCadInput(body.cadInput??savedCadInput);
+    const bytes=Buffer.from(body.dataBase64,'base64');stage='FILE_ACCEPTED';await appendDiagnostic(diagnosticLog,scanId,'API',stage,`fileName=${fileName} size=${bytes.length} blockNames=${config.blockNames.join(',')}`);
+    const key=crypto.createHash('sha256').update(scannerVersion).update(JSON.stringify(config)).update(bytes).digest('hex'),cachePath=path.join(cacheDir,`${key}.json`);await fs.mkdir(cacheDir,{recursive:true});
+    try{await appendDiagnostic(diagnosticLog,scanId,'SCAN','BACKEND_PARSE_BEGIN','source=scan-cache');const cached=normalizeScanResult(JSON.parse(await fs.readFile(cachePath,'utf8')),config);cached.fileName=fileName;cached.cadInput=config;cached.cacheHit=true;cached.scanDurationMs=Date.now()-started;cached.diagnosticId=scanId;await appendDiagnostic(diagnosticLog,scanId,'API','RESULT_PARSE_OK','cacheHit=true JSONValid=true');await appendDiagnostic(diagnosticLog,scanId,'SCAN','BACKEND_PARSE_OK','cacheHit=true JSONValid=true');return sendSuccessfulScan(res,cached,diagnosticLog,scanId,started)}catch{}
     workDir=await fs.mkdtemp(path.join(os.tmpdir(),'drawing-list-'));const dwg=path.join(workDir,fileName),out=path.join(workDir,'scan.json');await fs.writeFile(dwg,bytes);
     stage='SCANNER_START';await appendDiagnostic(diagnosticLog,scanId,'API',stage,`temporaryWorkingPath=${workDir} inputFullPath=${dwg}`);
-    await runPowerShell(runner,['-Dwg',dwg,'-Output',out,'-DiagnosticLog',diagnosticLog,'-ScanId',scanId,'-ApplicationVersion',applicationVersion]);
+    const configPath=path.join(workDir,'cad-input.json');await fs.writeFile(configPath,JSON.stringify(config),'utf8');
+    await runPowerShell(runner,['-Dwg',dwg,'-Output',out,'-DiagnosticLog',diagnosticLog,'-ScanId',scanId,'-ApplicationVersion',applicationVersion,'-ScanConfig',configPath]);
     stage='SCANNER_COMPLETE';await appendDiagnostic(diagnosticLog,scanId,'API',stage,'workerExitCode=0');
-    stage='RESULT_PARSE_BEGIN';await appendDiagnostic(diagnosticLog,scanId,'API',stage,`output=${out}`);await appendDiagnostic(diagnosticLog,scanId,'SCAN','BACKEND_PARSE_BEGIN',`output=${out}`);const outputStat=await fs.stat(out),result=normalizeScanResult(JSON.parse(await fs.readFile(out,'utf8')));
+    stage='RESULT_PARSE_BEGIN';await appendDiagnostic(diagnosticLog,scanId,'API',stage,`output=${out}`);await appendDiagnostic(diagnosticLog,scanId,'SCAN','BACKEND_PARSE_BEGIN',`output=${out}`);const outputStat=await fs.stat(out),result=normalizeScanResult(JSON.parse(await fs.readFile(out,'utf8')),config);result.cadInput=config;
     await appendDiagnostic(diagnosticLog,scanId,'OUTPUT','PARSE_OK',`JSONValid=true outputSize=${outputStat.size} scannerStatus=${result.status||'missing'}`);
     if(result.status!=='ok')throw new Error(`Scanner returned ${result.status}: ${result.error?.code||''} ${result.error?.message||''}`.trim());
     stage='RESULT_PARSE_OK';await appendDiagnostic(diagnosticLog,scanId,'API',stage,`JSONValid=true outputSize=${outputStat.size}`);await appendDiagnostic(diagnosticLog,scanId,'SCAN','BACKEND_PARSE_OK',`JSONValid=true outputSize=${outputStat.size}`);await fs.writeFile(cachePath,JSON.stringify(result),'utf8');

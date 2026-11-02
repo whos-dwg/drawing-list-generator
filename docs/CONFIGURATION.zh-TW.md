@@ -6,7 +6,7 @@
 
 `app/server.mjs` 從 `app/core.mjs` 匯入 `defaultPreset`，並透過 `/api/preset` 提供給頁面。`app/presets/hba-drawing-list.json` 是隨附的設定參考檔，現行服務不會自動載入它。
 
-ADMIN SETTINGS 提供目前工作階段的工作表、起始儲存格與欄位公式編輯。分類設定區只顯示規則，沒有編輯或儲存按鈕。若要永久修改預設值，須編輯 `core.mjs` 的 `defaultPreset`，重啟服務後重新整理頁面。
+v8.13 的 CAD INPUT 可儲存圖塊名稱與屬性映射至 `app/local-settings.json`，服務啟動時還原；RESET TO DEFAULT 也會保存預設 CAD 輸入。Excel 工作表、起點與公式仍只在目前頁面工作階段編輯。分類設定區只顯示規則，沒有編輯或儲存按鈕。若要永久修改預設值，須編輯 `core.mjs` 的 `defaultPreset`，重啟服務後重新整理頁面。
 
 預設名稱 `HBA Drawing List` 是來源設定標籤，不代表任何機構對此專案的背書。
 
@@ -75,11 +75,17 @@ ADMIN SETTINGS 提供目前工作階段的工作表、起始儲存格與欄位�
 
 `sortMethod: "layoutOrder"` 雖存在於預設值，現行核心不依此欄位切換排序策略；不要將它視為可用的排序選單。
 
-## 圖框名稱限制
+## CAD INPUT 圖框與屬性映射
 
-`titleBlockName` 設定值目前不會傳給 CAD 掃描器。`DrawingScanner.cs` 中的命令固定呼叫 `ScanDatabase(..., "A1_TITLE_EN")`。
+在 ADMIN SETTINGS → CAD INPUT 填入一個或多個圖塊全名，以逗號分隔；不分大小寫，最多 32 個名稱，每個最長 255 字元。這是完整名稱比對，不使用萬用字元。
 
-若要支援另一個圖框，必須修改掃描器並為相應 AutoCAD 版本重新編譯 DLL。來源包缺少 CAD 專案檔、版本別建置設定與完整重建流程，不能只改 JSON 就宣稱已支援新圖框。
+Drawing number 映射必填；Title 1–4 可設來源標籤或留空。圖名輸出順序仍為 1 → 3 → 2 → 4。標準 Token 讀取映射後資料，原始標籤也保留於 rawAttributes。
+
+按 SAVE INPUT SETTINGS 後，圖塊名稱及屬性映射會存入本機。只改標籤可以立即重建既有預覽；改圖塊名稱後，舊掃描會顯示 SCAN_BLOCK_CONFIG_CHANGED，必須重新掃描。
+
+掃描後開啟 DISCOVERED BLOCKS，可看見紙空間圖塊、數量與屬性標籤。點選名稱會替換輸入欄位，仍需保存並重掃。未找到圖框時也可使用此清單檢查實際名稱。
+
+掃描以 `cadInput.blockNames` 與 `cadInput.attributeMap` 傳入工作程序。`titleBlockName` 為舊設定欄位，應優先使用 CAD INPUT。自訂圖框或圖號標籤的路徑只會選用 2021 掃描器；來源包仍缺少完整 CAD 建置專案。
 
 ## 本機連接埠
 

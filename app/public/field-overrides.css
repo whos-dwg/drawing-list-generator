@@ -1,4 +1,34 @@
 /* Original underline field treatment requested for the compact user options. */
+.mapping-config { min-width: 0; }
+.mapping-config .cad-input-settings { margin: 0 0 28px; border: 1px solid var(--ink); }
+.cad-input-settings > summary { padding: 15px 18px; background: var(--ink); color: var(--white); letter-spacing: .06em; }
+.cad-input-body { padding: 20px; }
+.block-name-field { display: grid; gap: 9px; font: 700 11px Consolas, monospace; }
+.block-name-field input, .cad-attribute-field input { min-width: 0; width: 100%; min-height: 39px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 0; background: rgba(255,255,255,.85); color: var(--blue); font: 600 13px Consolas, monospace; }
+.block-name-field input:focus-visible, .cad-attribute-field input:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.block-name-field small, .cad-input-help, .discovered-blocks p { color: var(--muted); font: 12px/1.65 "Segoe UI",sans-serif; }
+.cad-map-labels, .cad-attribute-field { display: grid; grid-template-columns: minmax(160px,.8fr) minmax(200px,1.2fr); gap: 18px; align-items: center; }
+.cad-map-labels { margin-top: 24px; padding-bottom: 9px; border-bottom: 1px solid var(--ink); font: 700 10px Consolas,monospace; color: var(--muted); }
+.cad-attribute-field { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.cad-attribute-field span { font-size: 12px; font-weight: 700; }
+.cad-attribute-field code { display: block; margin-top: 3px; color: var(--muted); font: 10px Consolas,monospace; }
+.cad-input-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+#cadInputStatus { flex: 1 1 180px; font-size: 12px; line-height: 1.55; color: var(--muted); }
+#cadInputStatus.error { color: #b50021; }
+#cadInputStatus.saved { color: var(--ok); }
+.discovered-blocks { border-top: 1px solid var(--line); padding-top: 16px; }
+#discoveredBlocks { display: grid; gap: 8px; max-height: 280px; overflow: auto; }
+.discovered-block { display: grid; grid-template-columns: minmax(140px,.7fr) 1.3fr; gap: 15px; padding: 11px; border: 1px solid var(--line); background: #fff; align-items: start; }
+.discovered-block button { padding: 0; border: 0; background: none; color: var(--blue); text-align: left; font: 700 11px/1.5 Consolas,monospace; cursor: pointer; overflow-wrap: anywhere; }
+.discovered-block button:hover { text-decoration: underline; }
+.discovered-block small { color: var(--muted); font: 10px/1.6 Consolas,monospace; overflow-wrap: anywhere; }
+.cad-block-source { display:block; margin-bottom:7px; color:var(--muted); font:10px Consolas,monospace; }
+@media(max-width:720px) {
+  .cad-input-body { padding:14px; }
+  .cad-map-labels { display:none; }
+  .cad-attribute-field, .discovered-block { grid-template-columns:1fr; gap:7px; }
+}
+
 .user-options {
   align-items: flex-end;
 }

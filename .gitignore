@@ -4,6 +4,8 @@ node_modules/
 /DrawingList.exe
 
 # Project data and local diagnostics
+app/local-settings.json
+app/local-settings.json.tmp
 app/scan-cache/
 logs/
 autocad-diagnostic.txt

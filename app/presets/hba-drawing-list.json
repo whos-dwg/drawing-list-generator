@@ -1,6 +1,16 @@
 {
   "name": "HBA Drawing List",
   "titleBlockName": "A1_TITLE_EN",
+  "cadInput": {
+    "blockNames": ["A1_TITLE_EN"],
+    "attributeMap": {
+      "DWG_NUMBER": "DWG_NUMBER",
+      "DRAWING_TITLE_1": "DRAWING_TITLE_1",
+      "DRAWING_TITLE_2": "DRAWING_TITLE_2",
+      "DRAWING_TITLE_3": "DRAWING_TITLE_3",
+      "DRAWING_TITLE_4": "DRAWING_TITLE_4"
+    }
+  },
   "targetWorksheet": "Drawing List",
   "sheetSize": "A1",
   "sortMethod": "layoutOrder",

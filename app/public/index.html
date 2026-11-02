@@ -3,7 +3,24 @@
 <main><section class="hero hero-cover" aria-label="Drawing List Generator"><img src="/assets/drawing-list-generator-cover.png" alt="From drawings, to a ready list — Drawing List Generator"></section>
 <nav id="steps"><button class="active">01 SELECT FILES</button><button>02 SCAN</button><button>03 REVIEW WARNINGS</button><button>04 GENERATE</button></nav>
 <section class="panel upload-grid"><label class="drop"><input id="dwg" type="file" accept=".dwg" multiple><strong>DWG</strong><span id="dwgName">SELECT ONE OR MORE DRAWINGS</span><em>Add files from different folders when needed</em></label><input id="dwgAdd" class="hidden" type="file" accept=".dwg" multiple><label class="drop"><input id="xlsx" type="file" accept=".xls,.xlsx"><strong>XLS</strong><span id="xlsxName">SELECT AN EXCEL TEMPLATE</span><em>Supports .xls / .xlsx and preserves formatting</em></label><div class="upload-actions"><button id="addDwg" class="utility" type="button">＋ ADD DWG</button><button id="reimport" class="utility" type="button">↻ CLEAR</button><button id="scan" class="primary">SCAN DRAWINGS <span>→</span></button></div><div class="user-options"><label>DRAWING SIZE<input id="sheetSize" value="A1"></label><label class="batch"><input id="batch" type="checkbox" checked><span>CURRENT BATCH</span></label><small>Optional output values applied to drawing rows</small></div></section>
-<section id="admin" class="panel admin hidden"><div class="mapping-title"><p class="eyebrow">ADMIN / PRESET SETTINGS</p><h2>Output configuration</h2><p>Normal users do not need to change these values.</p><button id="openDiagnostics" class="utility" type="button">OPEN DIAGNOSTIC FOLDER</button></div><div class="mapping-config"><div class="mapping-basics"><label>WORKSHEET<input id="worksheet"></label></div><div class="mapping-labels"><span>OUTPUT FIELD</span><span>START CELL</span><span>FORMULA / TOKEN</span></div><div id="fields"></div><details><summary>CLASSIFICATION CONFIGURATION</summary><pre id="classification"></pre></details></div></section>
+<section id="admin" class="panel admin hidden">
+  <div class="mapping-title"><p class="eyebrow">ADMIN / PRESET SETTINGS</p><h2>Input & output</h2><p>指定圖框、屬性與 Excel 寫入位置。</p><button id="openDiagnostics" class="utility" type="button">OPEN DIAGNOSTIC FOLDER</button></div>
+  <div class="mapping-config">
+    <details class="cad-input-settings" open>
+      <summary>CAD INPUT / 圖框與屬性</summary>
+      <div class="cad-input-body">
+        <label class="block-name-field">圖塊名稱 / BLOCK NAMES<input id="blockNames" list="blockSuggestions" value="A1_TITLE_EN" placeholder="例如 A1_TITLE_EN, CONSULTANT_FRAME" autocomplete="off"><small>依完整名稱比對，不分大小寫；可用逗號指定多個名稱。</small></label>
+        <datalist id="blockSuggestions"></datalist><datalist id="attributeSuggestions"></datalist>
+        <div class="cad-map-labels"><span>用途 / OUTPUT</span><span>來源屬性標籤 / ATTRIBUTE TAG</span></div>
+        <div id="attributeMapping"></div>
+        <p class="cad-input-help">圖名依 1 → 3 → 2 → 4 組合；不用的圖名欄位可留空。所有來源屬性仍可在 Excel 公式中用 {標籤} 讀取。</p>
+        <div class="cad-input-actions"><button id="saveCadInput" class="primary" type="button">SAVE INPUT SETTINGS</button><button id="resetCadInput" class="utility" type="button">RESET TO DEFAULT</button><span id="cadInputStatus" role="status" aria-live="polite">設定會儲存在這台電腦。</span></div>
+        <details class="discovered-blocks"><summary>圖檔內的圖塊與屬性 / DISCOVERED BLOCKS</summary><p id="discoveredHint">掃描後會列出配置空間中的圖塊名稱與屬性，點選圖塊可套入上方欄位。</p><div id="discoveredBlocks"></div></details>
+      </div>
+    </details>
+    <div class="mapping-basics"><label>WORKSHEET<input id="worksheet"></label></div><div class="mapping-labels"><span>OUTPUT FIELD</span><span>START CELL</span><span>FORMULA / TOKEN</span></div><div id="fields"></div><details><summary>CLASSIFICATION CONFIGURATION</summary><pre id="classification"></pre></details>
+  </div>
+</section>
 <section id="workspace" class="hidden"><div class="section-head"><div><p class="eyebrow">SCAN RESULT</p><h2>Review drawings, classification & warnings</h2></div><div id="metrics" class="metrics"></div></div><div id="issues"></div><div class="table-wrap"><table><thead><tr><th>IN</th><th>#</th><th>LAYOUT</th><th>DWG NUMBER</th><th>DRAWING TITLE</th><th>CLASSIFICATION</th><th>STATUS</th></tr></thead><tbody id="cadRows"></tbody></table></div>
 <div id="excelPreview"><div class="section-head"><div><p class="eyebrow">READY TO GENERATE</p><h2>Excel write preview</h2></div><button id="generate" class="primary generate">GENERATE DRAWING LIST <span>↓</span></button></div><div class="table-wrap"><table><thead><tr><th>ITEM</th><th>LAYOUT</th><th>TARGET CELL / VALUE</th></tr></thead><tbody id="previewRows"></tbody></table></div></div></section>
 </main><button id="backToTop" class="back-to-top" type="button" aria-label="Back to top" title="Back to top">↑</button><footer>FILES NEVER LEAVE THIS MACHINE <span>•</span> SCAN CACHE ENABLED <span>•</span> AUTOCAD 2021 VALIDATED</footer><script type="module" src="/app.js"></script></body></html>

@@ -6,12 +6,12 @@
 
 **Read AutoCAD title blocks, review drawing classifications, and generate a drawing list using your Excel template.**
 
-![Version v8.12](https://img.shields.io/badge/version-v8.12-1845B9)
+![Version v8.13](https://img.shields.io/badge/version-v8.13-1845B9)
 ![Windows](https://img.shields.io/badge/platform-Windows-555555)
 ![AutoCAD 2021 validated](https://img.shields.io/badge/AutoCAD-2021%20validated-237A57)
 [![MIT License](https://img.shields.io/badge/license-MIT-1845B9)](LICENSE)
 
-[繁體中文](README.md) · [Download v8.12](https://github.com/whos-dwg/drawing-list-generator/releases/tag/v8.12) · [Quick start](#quick-start) · [Release notes](docs/releases/v8.12.en.md) · [Architecture](docs/ARCHITECTURE.md)
+[繁體中文](README.md) · [Download v8.13](https://github.com/whos-dwg/drawing-list-generator/releases/tag/v8.13) · [Quick start](#quick-start) · [Release notes](docs/releases/v8.13.en.md) · [Architecture](docs/ARCHITECTURE.md)
 
 </div>
 
@@ -21,29 +21,29 @@ The application processes files locally through a service bound to `127.0.0.1:43
 
 > The original release documentation identifies AutoCAD 2021 as validated. Version-specific scanners for 2018 and 2026 are included but await device testing. This documentation pass reran the core tests; it did not revalidate AutoCAD, Excel, or the launcher.
 
-## Download v8.12
+## Download v8.13
 
 | Download | Link |
 | --- | --- |
-| Windows portable package (about 36.7 MB) | [Download DrawingList-Generator-v8.12-Windows-Portable.zip](https://github.com/whos-dwg/drawing-list-generator/releases/download/v8.12/DrawingList-Generator-v8.12-Windows-Portable.zip) |
-| File integrity | [SHA256SUMS.txt](https://github.com/whos-dwg/drawing-list-generator/releases/download/v8.12/SHA256SUMS.txt) |
-| Changes and compatibility | [v8.12 Release](https://github.com/whos-dwg/drawing-list-generator/releases/tag/v8.12) |
+| Windows portable package (about 36.7 MB) | [Download DrawingList-Generator-v8.13-Windows-Portable.zip](https://github.com/whos-dwg/drawing-list-generator/releases/download/v8.13/DrawingList-Generator-v8.13-Windows-Portable.zip) |
+| File integrity | [SHA256SUMS.txt](https://github.com/whos-dwg/drawing-list-generator/releases/download/v8.13/SHA256SUMS.txt) |
+| Changes and compatibility | [v8.13 Release](https://github.com/whos-dwg/drawing-list-generator/releases/tag/v8.13) |
 
 Extract the entire package and double-click `DrawingList.exe`. Node.js is bundled; AutoCAD, desktop Excel, and the ACE Provider for XLS export remain external requirements. GitHub's automatic Source code archive does not include the portable launcher or runtime.
 
 SHA-256 of the portable ZIP:
 
 ~~~text
-1332be3c72573801f3188b3a4071a7423cb6592b978d0e8416d6cacfe16f10b7
+5d18c4bb99842919e3c4a385efcf87eb6dceb8bf5fa09de20c0f7e6eddbef2d9
 ~~~
 
-In PowerShell, run `Get-FileHash -Algorithm SHA256 '.\DrawingList-Generator-v8.12-Windows-Portable.zip'` to compare your download. The [GitHub Actions core test run](https://github.com/whos-dwg/drawing-list-generator/actions/runs/41040169867) passed. See the requirements below for the limits of AutoCAD and Excel validation.
+In PowerShell, run `Get-FileHash -Algorithm SHA256 '.\DrawingList-Generator-v8.13-Windows-Portable.zip'` to compare your download. See the [GitHub Actions core tests](https://github.com/whos-dwg/drawing-list-generator/actions/workflows/core-tests.yml) for cloud validation. See the requirements below for the limits of AutoCAD and Excel validation.
 
 ## Contents
 
-- [Download v8.12](#download-v812)
+- [Download v8.13](#download-v813)
 - [Features](#features)
-- [What changed in v8.12](#what-changed-in-v812)
+- [What changed in v8.13](#what-changed-in-v813)
 - [Requirements](#requirements)
 - [Quick start](#quick-start)
 - [Output example](#output-example)
@@ -55,7 +55,7 @@ In PowerShell, run `Get-FileHash -Algorithm SHA256 '.\DrawingList-Generator-v8.1
 ## Features
 
 - Select multiple DWG files, including files added from different folders. Scans run sequentially.
-- Read attributes from `A1_TITLE_EN` blocks placed directly in paper-space layouts.
+- Read attributes from selected title blocks placed directly in paper-space layouts; configure names and mappings in CAD INPUT.
 - Classify drawings using title keywords and drawing-number codes.
 - Review conflicts, assign categories manually, confirm OTHER DRAWINGS, or exclude layouts.
 - Block generation for duplicate drawing numbers, missing required data, and unconfirmed categories.
@@ -63,9 +63,13 @@ In PowerShell, run `Get-FileHash -Algorithm SHA256 '.\DrawingList-Generator-v8.1
 - Export `.xls` or `.xlsx` using the corresponding template format.
 - Retrieve failure diagnostics by scan ID.
 
-## What changed in v8.12
+## What changed in v8.13
 
-Layout-dependent drawing-number corrections remain automatic and no longer appear as user-facing warnings. Actionable validation issues remain visible. See the [release notes](docs/releases/v8.12.en.md) and [changelog](CHANGELOG.md).
+**ADMIN SETTINGS → CAD INPUT** now accepts exact title-block names and maps source attributes to drawing number and Title 1–4. Multiple names are comma-separated and matched without regard to case; unused title mappings may be blank.
+
+Saved CAD input settings are restored on launch. Changing only attribute mappings updates the preview from retained raw data. Changing selected block names requires a new scan and blocks export from stale scan data.
+
+**DISCOVERED BLOCKS** lists paper-space block names and tags after scanning. The 2021 scanner also reads constant attributes. The custom-block and custom-number-tag path targets AutoCAD 2021; see the [release notes](docs/releases/v8.13.en.md).
 
 ## Requirements
 
@@ -85,7 +89,7 @@ AutoCAD, Excel, and the ACE Provider are external dependencies. No sample DWG or
 
 ### Portable Windows download
 
-1. Download **DrawingList-Generator-v8.12-Windows-Portable.zip** from this repository's Releases.
+1. Download **DrawingList-Generator-v8.13-Windows-Portable.zip** from this repository's Releases.
 2. Extract the entire archive to a writable folder. Keep `DrawingList.exe`, `app`, and `runtime` together.
 3. Double-click `DrawingList.exe`.
 4. Select DWGs and an Excel template. Set DRAWING SIZE and CURRENT BATCH.
@@ -125,7 +129,7 @@ Category and blank rows count toward output offsets.
 
 The default worksheet is `Drawing List`. Output starts at A9, B9, C9, and D9. ADMIN SETTINGS lets users edit worksheet, cell, and token formula values for the current page session.
 
-The scanner currently hard-codes `A1_TITLE_EN`. Editing `titleBlockName` in a preset does not change scanner behavior. The JSON under `app/presets/` is a reference copy; the server imports `defaultPreset` from `app/core.mjs`.
+The default block is `A1_TITLE_EN`. CAD INPUT saves selected names and attribute mappings in `app/local-settings.json`; Excel output settings remain session-specific. Configure `cadInput` rather than relying on the legacy `titleBlockName` property. The JSON under `app/presets/` is a reference copy; the server imports `defaultPreset` from `app/core.mjs`.
 
 The scanner processes paper-space layouts and does not recursively inspect nested blocks or xrefs. The layout-number correction handles particular CTAB naming patterns, rather than evaluating every AutoCAD Field.
 
@@ -142,7 +146,7 @@ cd app
 npm test
 ~~~
 
-On 2026-10-30, all **9 existing core tests passed** under Node.js v24.18.0. They cover classification, confirmation, grouping, and drawing-number normalization. They do not cover AutoCAD binaries, the launcher, or Excel integration.
+On 2026-11-02, all **15 existing core tests passed** under Node.js v24.22.1. They cover CAD input normalization, custom attribute mapping, stale block configuration, classification, grouping, and drawing-number normalization. They do not cover AutoCAD binaries, the launcher, or Excel integration.
 
 The project uses Node.js, browser JavaScript, PowerShell, and an AutoCAD .NET scanner. Precompiled scanner DLLs are retained from the supplied package. Launcher source and CAD project files were absent, so a complete binary rebuild is not available from this repository.
 
@@ -150,7 +154,7 @@ See [architecture](docs/ARCHITECTURE.md) and [contribution guidelines](CONTRIBUT
 
 ## Local data and support
 
-`app/scan-cache/` may contain project attributes. Failure logs under `logs/cad-diagnostics/` may include filenames, paths, and CAD console output. Successful scan logs are removed automatically. The original release notes identify `logs/DrawingList.log` as the launcher log.
+`app/local-settings.json` stores saved CAD input settings. `app/scan-cache/` may contain project attributes. Failure logs under `logs/cad-diagnostics/` may include filenames, paths, and CAD console output. Successful scan logs are removed automatically. The original release notes identify `logs/DrawingList.log` as the launcher log.
 
 Use Issues for ordinary problems. Remove project and personal information before attaching logs. See [SECURITY.md](SECURITY.md) for private reporting guidance.
 

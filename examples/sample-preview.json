@@ -31,6 +31,13 @@
         "warnings": [],
         "attributes": {
           "DWG_NUMBER": "L2-A-P1-001",
+          "DRAWING_TITLE_1": "GENERAL ARRANGEMENT PLAN",
+          "DRAWING_TITLE_2": "",
+          "DRAWING_TITLE_3": "",
+          "DRAWING_TITLE_4": ""
+        },
+        "rawAttributes": {
+          "DWG_NUMBER": "L2-A-P1-001",
           "DRAWING_TITLE_1": "GENERAL ARRANGEMENT PLAN"
         },
         "scanIndex": 0,
@@ -82,6 +89,13 @@
         "warnings": [],
         "attributes": {
           "DWG_NUMBER": "L2-A-DW-003",
+          "DRAWING_TITLE_1": "WALL FINISH DETAIL",
+          "DRAWING_TITLE_2": "",
+          "DRAWING_TITLE_3": "",
+          "DRAWING_TITLE_4": ""
+        },
+        "rawAttributes": {
+          "DWG_NUMBER": "L2-A-DW-003",
           "DRAWING_TITLE_1": "WALL FINISH DETAIL"
         },
         "scanIndex": 1,
@@ -92,6 +106,42 @@
     }
   ],
   "issues": [],
+  "layouts": [
+    {
+      "layout": "L2-A-P1-001",
+      "layoutIndex": 1,
+      "included": true,
+      "warnings": [],
+      "attributes": {
+        "DWG_NUMBER": "L2-A-P1-001",
+        "DRAWING_TITLE_1": "GENERAL ARRANGEMENT PLAN",
+        "DRAWING_TITLE_2": "",
+        "DRAWING_TITLE_3": "",
+        "DRAWING_TITLE_4": ""
+      },
+      "rawAttributes": {
+        "DWG_NUMBER": "L2-A-P1-001",
+        "DRAWING_TITLE_1": "GENERAL ARRANGEMENT PLAN"
+      }
+    },
+    {
+      "layout": "L2-A-DW-003",
+      "layoutIndex": 2,
+      "included": true,
+      "warnings": [],
+      "attributes": {
+        "DWG_NUMBER": "L2-A-DW-003",
+        "DRAWING_TITLE_1": "WALL FINISH DETAIL",
+        "DRAWING_TITLE_2": "",
+        "DRAWING_TITLE_3": "",
+        "DRAWING_TITLE_4": ""
+      },
+      "rawAttributes": {
+        "DWG_NUMBER": "L2-A-DW-003",
+        "DRAWING_TITLE_1": "WALL FINISH DETAIL"
+      }
+    }
+  ],
   "classifications": [
     {
       "scanIndex": 0,
