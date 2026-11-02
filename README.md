@@ -11,7 +11,7 @@
 ![AutoCAD 2021 validated](https://img.shields.io/badge/AutoCAD-2021%20validated-237A57)
 [![License MIT](https://img.shields.io/badge/license-MIT-1845B9)](LICENSE)
 
-[快速開始](#快速開始) · [操作指南](docs/USAGE.zh-TW.md) · [設定說明](docs/CONFIGURATION.zh-TW.md) · [v8.12 發布說明](docs/releases/v8.12.zh-TW.md) · [English](README.en.md)
+[下載 v8.12](https://github.com/whos-dwg/drawing-list-generator/releases/tag/v8.12) · [快速開始](#快速開始) · [操作指南](docs/USAGE.zh-TW.md) · [設定說明](docs/CONFIGURATION.zh-TW.md) · [v8.12 發布說明](docs/releases/v8.12.zh-TW.md) · [English](README.en.md)
 
 </div>
 
@@ -21,8 +21,27 @@ DWG 與 Excel 的處理在本機執行；介面透過 `127.0.0.1:4310` 連接本
 
 > **相容性：** 原始 v8.12 發行文件列 AutoCAD 2021 為已驗證目標。2018／2026 的掃描 DLL 已隨附，仍待裝置測試；本次文件整理僅重跑核心邏輯測試，未重新驗證 AutoCAD 或 Excel 的完整流程。
 
+## 下載 v8.12
+
+| 內容 | 連結 |
+| --- | --- |
+| Windows 免安裝版（約 36.7 MB） | [下載 DrawingList-Generator-v8.12-Windows-Portable.zip](https://github.com/whos-dwg/drawing-list-generator/releases/download/v8.12/DrawingList-Generator-v8.12-Windows-Portable.zip) |
+| 檔案完整性 | [SHA256SUMS.txt](https://github.com/whos-dwg/drawing-list-generator/releases/download/v8.12/SHA256SUMS.txt) |
+| 本版更新、環境需求與英文說明 | [v8.12 Release](https://github.com/whos-dwg/drawing-list-generator/releases/tag/v8.12) |
+
+下載後完整解壓縮，雙擊 `DrawingList.exe`。Node.js 已隨附；AutoCAD、桌面版 Excel 及 XLS 所需的 ACE Provider 仍須安裝。GitHub 自動產生的 Source code ZIP 供開發使用，沒有免安裝啟動器與執行環境。
+
+本版免安裝 ZIP 的 SHA-256：
+
+~~~text
+1332be3c72573801f3188b3a4071a7423cb6592b978d0e8416d6cacfe16f10b7
+~~~
+
+可在 PowerShell 執行 `Get-FileHash -Algorithm SHA256 '.\DrawingList-Generator-v8.12-Windows-Portable.zip'`，比對下載檔案的雜湊。分類與 Layout 圖號邏輯的 [GitHub Actions 核心測試](https://github.com/whos-dwg/drawing-list-generator/actions/runs/41040169867)已通過；AutoCAD／Excel 實機驗證範圍見下方系統需求。
+
 ## 目錄
 
+- [下載 v8.12](#下載-v812)
 - [功能](#功能)
 - [v8.12 更新](#v812-更新)
 - [系統需求](#系統需求)

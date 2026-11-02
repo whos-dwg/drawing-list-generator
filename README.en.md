@@ -11,7 +11,7 @@
 ![AutoCAD 2021 validated](https://img.shields.io/badge/AutoCAD-2021%20validated-237A57)
 [![MIT License](https://img.shields.io/badge/license-MIT-1845B9)](LICENSE)
 
-[繁體中文](README.md) · [Quick start](#quick-start) · [Release notes](docs/releases/v8.12.en.md) · [Architecture](docs/ARCHITECTURE.md)
+[繁體中文](README.md) · [Download v8.12](https://github.com/whos-dwg/drawing-list-generator/releases/tag/v8.12) · [Quick start](#quick-start) · [Release notes](docs/releases/v8.12.en.md) · [Architecture](docs/ARCHITECTURE.md)
 
 </div>
 
@@ -21,8 +21,27 @@ The application processes files locally through a service bound to `127.0.0.1:43
 
 > The original release documentation identifies AutoCAD 2021 as validated. Version-specific scanners for 2018 and 2026 are included but await device testing. This documentation pass reran the core tests; it did not revalidate AutoCAD, Excel, or the launcher.
 
+## Download v8.12
+
+| Download | Link |
+| --- | --- |
+| Windows portable package (about 36.7 MB) | [Download DrawingList-Generator-v8.12-Windows-Portable.zip](https://github.com/whos-dwg/drawing-list-generator/releases/download/v8.12/DrawingList-Generator-v8.12-Windows-Portable.zip) |
+| File integrity | [SHA256SUMS.txt](https://github.com/whos-dwg/drawing-list-generator/releases/download/v8.12/SHA256SUMS.txt) |
+| Changes and compatibility | [v8.12 Release](https://github.com/whos-dwg/drawing-list-generator/releases/tag/v8.12) |
+
+Extract the entire package and double-click `DrawingList.exe`. Node.js is bundled; AutoCAD, desktop Excel, and the ACE Provider for XLS export remain external requirements. GitHub's automatic Source code archive does not include the portable launcher or runtime.
+
+SHA-256 of the portable ZIP:
+
+~~~text
+1332be3c72573801f3188b3a4071a7423cb6592b978d0e8416d6cacfe16f10b7
+~~~
+
+In PowerShell, run `Get-FileHash -Algorithm SHA256 '.\DrawingList-Generator-v8.12-Windows-Portable.zip'` to compare your download. The [GitHub Actions core test run](https://github.com/whos-dwg/drawing-list-generator/actions/runs/41040169867) passed. See the requirements below for the limits of AutoCAD and Excel validation.
+
 ## Contents
 
+- [Download v8.12](#download-v812)
 - [Features](#features)
 - [What changed in v8.12](#what-changed-in-v812)
 - [Requirements](#requirements)
